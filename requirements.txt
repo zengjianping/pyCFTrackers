@@ -1,6 +1,7 @@
-cupy
+#cupy
 matplotlib
-mxnet-cu90
+#mxnet-cu90
+mxnet
 numba
 scipy
 h5py
@@ -10,3 +11,6 @@ Cython
 numpy
 tqdm
 Pillow
+pandas
+pyyaml
+scikit-image
