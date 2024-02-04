@@ -149,6 +149,7 @@ class PyTracker:
         init_bbox = process_option.get('init_bbox', None)
         init_time = 0.0
         update_time = 0.0
+        accum_time = 0.0
         update_frames = 0
 
         idx = -1
@@ -202,9 +203,11 @@ class PyTracker:
             else:
                 time_s = time.time()
                 bbox = self.tracker.update(frame, vis=verbose)
-                update_time += time.time() - time_s
+                update_time = time.time() - time_s
+                accum_time += update_time
                 update_frames += 1
                 rc_color = (0,255,0)
+                print('time: {}, bbox: {}'.format(update_time, bbox))
 
             if verbose:
                 x1,y1,w,h = bbox
@@ -265,7 +268,7 @@ class PyTracker:
         if video_writer is not None:
             video_writer.release()
         
-        update_time /= update_frames
+        update_time = accum_time / update_frames
         print('init time: {}, update time: {}'.format(init_time, update_time))
 
         return True
