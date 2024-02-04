@@ -3,7 +3,7 @@ import pandas as pd
 import argparse, yaml
 import numpy as np
 from PIL import Image
-import argparse
+import argparse, time
 
 from lib.utils import get_img_list,get_ground_truthes,APCE,PSR
 from cftracker.mosse import MOSSE
@@ -147,6 +147,9 @@ class PyTracker:
         time_range = process_option['time_range']
         zoom_size = process_option['zoom_size']
         init_bbox = process_option.get('init_bbox', None)
+        init_time = 0.0
+        update_time = 0.0
+        update_frames = 0
 
         idx = -1
         for idx, frame in enumerate(get_frames(video_name, time_range, zoom_size)):
@@ -181,7 +184,9 @@ class PyTracker:
 
                 # starting tracking
                 self._create_tracker(is_color)
+                time_s = time.time()
                 self.tracker.init(frame, bbox)
+                init_time = time.time() - time_s
                 bbox = (bbox[0]-1, bbox[1]-1,
                         bbox[0]+bbox[2]-1, bbox[1]+bbox[3]-1)
                 rc_color = (255,0,0)
@@ -195,7 +200,10 @@ class PyTracker:
                     video_writer = cv2.VideoWriter(result_file, fourcc, 25, (width,height), True)
 
             else:
+                time_s = time.time()
                 bbox = self.tracker.update(frame, vis=verbose)
+                update_time += time.time() - time_s
+                update_frames += 1
                 rc_color = (0,255,0)
 
             if verbose:
@@ -256,6 +264,9 @@ class PyTracker:
             
         if video_writer is not None:
             video_writer.release()
+        
+        update_time /= update_frames
+        print('init time: {}, update time: {}'.format(init_time, update_time))
 
         return True
 
